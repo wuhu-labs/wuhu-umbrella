@@ -1,8 +1,8 @@
 repos:
-  - name: ai
+  - name: wuhu-ai
     url: git@github.com:wuhu-labs/wuhu-ai.git
     branch: main
-    path: ai
+    path: wuhu-ai
   - name: wuhu
     url: git@github.com:wuhu-labs/wuhu.git
     branch: main
