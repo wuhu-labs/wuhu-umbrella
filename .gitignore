@@ -1,0 +1,6 @@
+# Child repos — cloned by sync.ts, not tracked here
+ai/
+wuhu/
+
+# OS / editor
+.DS_Store
