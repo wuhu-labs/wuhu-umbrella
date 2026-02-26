@@ -25,20 +25,35 @@ The main `wuhu` repo pins stable versions of its dependencies (e.g.,
 ## Workspace + Issues
 
 Issues are managed locally at `~/.wuhu/workspace/issues/`. Each issue is a
-Markdown file named by its number (e.g., `0001.md`). Use the format
-`WUHU-####` (four digits) to reference them.
+Markdown file named by its number (e.g., `0041.md`). Use the format
+`WUHU-####` (four digits) to reference them. If you see "Fix WUHU-0041",
+assume it refers to an issue at that path (not GitHub Issues).
 
 The workspace lives at `~/.wuhu/workspace/` and contains shared docs,
 project plans, and architecture notes alongside issues.
 
-## Getting Started
+## Issue Workflow
+
+When you are assigned to work on a `WUHU-####` issue, you must create a new
+branch:
+
+1. If you are already on a new branch that has no changes and has no new
+   commits ahead of `main`, assume that branch is for you.
+2. If you are in a dirty place (uncommitted changes), stop and ask for human
+   intervention.
+3. If the current branch (either you created or already present) is behind
+   `origin/main`, bring it up to the latest `main` before you start your work.
+4. After you finish your work and perform validations, create a PR and make
+   sure all checks pass before you finish your work.
+
+## Template Maintenance
+
+This repo is used as a folder-template for Wuhu environments. The child repos
+should be pre-cloned so that workspace copies start ready to use.
+
+To refresh the template (pull latest on all child repos):
 
 ```bash
-# Clone this repo
-git clone git@github.com:wuhu-labs/wuhu-umbrella.git
-cd wuhu-umbrella
-
-# Sync all child repos
 bun sync.ts
 ```
 
@@ -47,3 +62,14 @@ bun sync.ts
 1. Add an entry to `repos.yml`
 2. Add the directory name to `.gitignore`
 3. Run `bun sync.ts`
+
+## Collaboration
+
+When the user is interactively asking questions while reviewing code:
+
+- Treat the user's questions/concerns as likely-valid signals, not as "user error".
+- Take a neutral stance: verify by inspecting the repo before concluding who's right.
+- Correct the user only when there's a clear factual mismatch, and cite the exact
+  file/symbol you're relying on.
+- Assume parts of the codebase may be sloppy/LLM-generated; prioritize clarity
+  and maintainability over defending the status quo.
