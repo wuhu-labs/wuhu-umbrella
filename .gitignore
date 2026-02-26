@@ -1,6 +1,7 @@
 # Child repos — cloned by sync.ts, not tracked here
 wuhu-ai/
 wuhu/
+wuhu-workspace-engine/
 
 # OS / editor
 .DS_Store
