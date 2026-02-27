@@ -16,11 +16,14 @@ files are picked up automatically. Not there yet.)
 | Directory | Repo | Description |
 |-----------|------|-------------|
 | `wuhu-ai/` | [wuhu-ai](https://github.com/wuhu-labs/wuhu-ai) | PiAI — unified LLM client library |
-| `wuhu/` | [wuhu](https://github.com/wuhu-labs/wuhu) | Main server, CLI, runner, integration |
+| `wuhu-workspace-engine/` | [wuhu-workspace-engine](https://github.com/wuhu-labs/wuhu-workspace-engine) | Workspace scanning and querying |
+| `wuhu-core/` | [wuhu-core](https://github.com/wuhu-labs/wuhu-core) | Agent runtime, server, runner, CLI |
+| `wuhu-app/` | [wuhu-app](https://github.com/wuhu-labs/wuhu-app) | Native apps (macOS, iOS) |
+| `wuhu/` | [wuhu](https://github.com/wuhu-labs/wuhu) | Archived — original monorepo |
 
 Each repo evolves independently with its own version and release cadence.
-The main `wuhu` repo pins stable versions of its dependencies (e.g.,
-`wuhu-ai` 0.1.0) and only bumps when explicitly integrating.
+Downstream repos pin stable version tags of their dependencies (e.g.,
+`wuhu-ai` 0.1.0) and only bump when explicitly integrating.
 
 ## Workspace + Issues
 

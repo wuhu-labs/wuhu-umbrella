@@ -3,11 +3,19 @@ repos:
     url: git@github.com:wuhu-labs/wuhu-ai.git
     branch: main
     path: wuhu-ai
-  - name: wuhu
-    url: git@github.com:wuhu-labs/wuhu.git
-    branch: main
-    path: wuhu
   - name: wuhu-workspace-engine
     url: git@github.com:wuhu-labs/wuhu-workspace-engine.git
     branch: main
     path: wuhu-workspace-engine
+  - name: wuhu-core
+    url: git@github.com:wuhu-labs/wuhu-core.git
+    branch: main
+    path: wuhu-core
+  - name: wuhu-app
+    url: git@github.com:wuhu-labs/wuhu-app.git
+    branch: main
+    path: wuhu-app
+  - name: wuhu
+    url: git@github.com:wuhu-labs/wuhu.git
+    branch: main
+    path: wuhu
