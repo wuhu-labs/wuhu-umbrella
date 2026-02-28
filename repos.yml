@@ -15,6 +15,10 @@ repos:
     url: git@github.com:wuhu-labs/wuhu-app.git
     branch: main
     path: wuhu-app
+  - name: wuhu-site
+    url: git@github.com:wuhu-labs/wuhu-site.git
+    branch: main
+    path: wuhu-site
   - name: wuhu
     url: git@github.com:wuhu-labs/wuhu.git
     branch: main
