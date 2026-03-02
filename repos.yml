@@ -19,6 +19,10 @@ repos:
     url: git@github.com:wuhu-labs/wuhu-site.git
     branch: main
     path: wuhu-site
+  - name: wuhu-markdown-ui
+    url: git@github.com:wuhu-labs/wuhu-markdown-ui.git
+    branch: main
+    path: wuhu-markdown-ui
   - name: wuhu
     url: git@github.com:wuhu-labs/wuhu.git
     branch: main

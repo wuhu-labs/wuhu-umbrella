@@ -19,6 +19,7 @@ files are picked up automatically. Not there yet.)
 | `wuhu-workspace-engine/` | [wuhu-workspace-engine](https://github.com/wuhu-labs/wuhu-workspace-engine) | Workspace scanning and querying |
 | `wuhu-core/` | [wuhu-core](https://github.com/wuhu-labs/wuhu-core) | Agent runtime, server, runner, CLI |
 | `wuhu-app/` | [wuhu-app](https://github.com/wuhu-labs/wuhu-app) | Native apps (macOS, iOS) |
+| `wuhu-markdown-ui/` | [wuhu-markdown-ui](https://github.com/wuhu-labs/wuhu-markdown-ui) | High-performance document & chat rendering engine |
 | `wuhu/` | [wuhu](https://github.com/wuhu-labs/wuhu) | Archived — original monorepo |
 
 Each repo evolves independently with its own version and release cadence.
