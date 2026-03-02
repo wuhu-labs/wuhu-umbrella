@@ -69,12 +69,29 @@ For each piece of the project:
      before pushing.
    - Instruction to wait for CI to pass.
 
-3. **Wait at least 30 minutes** before checking. This respects LLM costs
-   and Anthropic's 5-minute cache TTL (checking at 10-minute intervals
-   wastes money due to cache misses). Use `async_bash` with `sleep 1800`.
+3. **Wait for the child session to finish.** Use `async_bash` with
+   `sleep 1800` (30 minutes) as a timer. **Do NOT poll
+   `list_child_sessions` in a loop.** When the timer fires, check once. If
+   the session is still running, set another timer and move on.
 
-4. **Check the session**: `list_child_sessions`, then
-   `read_session_final_message` if idle.
+   ```
+   ❌ BAD:  calling list_child_sessions every few seconds in a loop
+   ✅ GOOD: sleep 1800, then check once, then sleep again if needed
+   ```
+
+   **Why this matters:** Each `list_child_sessions` call is a full LLM
+   round-trip. The context grows by 2 messages per call. In a 51-minute
+   wait, polling every 4 seconds produces 765 calls and burns ~135M input
+   tokens — even with prompt caching, this costs ~$70. A degenerate polling
+   loop can also hit the 200K token context limit and brick the session.
+
+   After setting the timer, **do other useful work** (plan next sessions,
+   review code, etc.) or simply yield. Do not busy-wait.
+
+4. **Check the session**: When the timer fires, call `list_child_sessions`
+   **once**. If idle, call `read_session_final_message`. If still running,
+   set another 30-minute timer. Never call `list_child_sessions` more than
+   once per check.
 
 5. **Review the PR**: Use `gh pr view` and `gh pr diff` to inspect. Verify
    CI is green: check `statusCheckRollup` in the PR JSON.
@@ -101,18 +118,45 @@ This ensures the template is up to date for future sessions.
 
 - **You are the coordinator, not the implementer.** Scaffold the repo and
   dispatch tasks. Do not implement features in this session.
-- **Sessions are sequential, not parallel.** Each session builds on the
-  previous one's merged work. Artifacts pass through git.
+- **Sessions are sequential by default, parallel when independent.** If
+  two sessions touch different repos with no dependency between them (e.g.,
+  a CLI flag in `wuhu-core` and a UI feature in `wuhu-app`), dispatch them
+  at the same time. Set one timer for both — when it fires, check both
+  with a single `list_child_sessions` call. If sessions depend on each
+  other (e.g., session 2 needs session 1's merged types), they must be
+  sequential. Artifacts pass through git.
 - **Each child session creates a PR.** This gives you CI validation and a
   clean review surface.
 - **Give detailed context in task descriptions.** The child session doesn't
   have your conversation history — tell it exactly what exists and what to
   build.
-- **30-minute check intervals.** Don't poll aggressively. Use `sleep 1800`.
+- **NEVER poll `list_child_sessions` in a loop.** Set a timer, do other
+  work, check once when it fires. This is the single most important rule.
+  Violating it has caused sessions to burn hundreds of dollars and brick
+  themselves by hitting the 200K token context limit.
 - **Sync before every dispatch.** Run `bun sync.ts` in the template folder
   so the child session gets the latest `main`.
 - **Tell children to `git pull`.** Even after syncing the template, tell
   each child to `git pull origin main` as a safety net.
+
+## Version tagging
+
+When a child session's PR is merged:
+
+- **Only bump the minor version** (e.g., 0.1.0 → 0.2.0) for breaking
+  changes — new wire formats, removed APIs, changed Codable encoding.
+- **Bump the patch version** (e.g., 0.2.0 → 0.2.1) for additive changes —
+  new features, bug fixes, new endpoints that don't break existing clients.
+- **Tell child sessions what version to tag.** Include the expected tag in
+  the task description. Don't let them guess. Example: "After merging, tag
+  `0.2.1` and push the tag."
+- **If a downstream repo pins a dependency** (e.g., `wuhu-core` pins
+  `wuhu-ai` via `from: "0.2.0"`), the child session task must specify the
+  version bump for `Package.swift`. Include the exact line to change.
+- **Breaking wire format changes are dangerous.** If a PR changes how types
+  are encoded/decoded (e.g., `Codable` format), both client and server must
+  be updated together. Call this out explicitly in the task description so
+  the child session adds backward-compat decoding if possible.
 
 ## Example decomposition
 
