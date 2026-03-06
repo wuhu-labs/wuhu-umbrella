@@ -23,8 +23,32 @@ files are picked up automatically. Not there yet.)
 | `wuhu/` | [wuhu](https://github.com/wuhu-labs/wuhu) | Archived — original monorepo |
 
 Each repo evolves independently with its own version and release cadence.
-Downstream repos pin stable version tags of their dependencies (e.g.,
-`wuhu-ai` 0.1.0) and only bump when explicitly integrating.
+Downstream repos pin **exact** version tags of their upstream dependencies
+(e.g., `exact: "0.3.2"` in `Package.swift`, `exactVersion: "0.5.1"` in
+xcodegen `project.yml`). Range-based version specifiers (`from:`) are not
+used for internal Wuhu dependencies.
+
+## Versioning
+
+**Library repos** (wuhu-ai, wuhu-workspace-engine, wuhu-core, wuhu-markdown-ui)
+use tag-based releases. At this stage, versions increment the patch number and
+roll over at 10 (e.g., `0.1.9` → `0.2.0`). Minor/major bumps are reserved for
+when things stabilize.
+
+**wuhu-app** has its own version cadence driven by App Store / TestFlight
+requirements. Build numbers increment freely; the marketing version only bumps
+when there's something user-facing to ship.
+
+**Dependency update workflow:**
+1. Do work in an upstream repo (e.g., wuhu-ai).
+2. Tag a release (e.g., `0.3.3`).
+3. When ready to integrate, bump the exact pin in the downstream repo's
+   `Package.swift` or `project.yml` and open a PR.
+4. CI validates the integration — that's the integration test.
+
+There is no coordinated cross-repo versioning. Each repo is bumped
+independently, and downstream integration is always an explicit, intentional
+step.
 
 ## Workspace + Issues
 
