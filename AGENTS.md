@@ -36,10 +36,40 @@ assume it refers to an issue at that path (not GitHub Issues).
 The workspace lives at `~/.wuhu/workspace/` and contains shared docs,
 project plans, and architecture notes alongside issues.
 
+## Branching & Merge Strategy
+
+The umbrella repo and the child repos follow different workflows:
+
+### This Repo (wuhu-umbrella)
+
+Direct push to `main`. No branches, no PRs — this is a config/template repo
+where fast iteration matters more than review gates. `main` is protected
+against force push and deletion to preserve linear history.
+
+### Child Repos (wuhu-ai, wuhu-core, etc.)
+
+All child repos use **branch → PR → squash merge**:
+
+1. Create a feature/fix branch off `main`.
+2. Open a PR targeting `main`.
+3. Update the PR branch to latest `main` (via `gh api -X PUT
+   repos/wuhu-labs/<repo>/pulls/<number>/update-branch` or the GitHub UI).
+4. Wait for CI checks to go green.
+5. Squash merge (manually or via auto-merge).
+
+When merging, if you discover a repo is missing any of the following, fix it
+on the spot using `gh`:
+
+- **Auto-merge not enabled** → `gh repo edit wuhu-labs/<repo> --enable-auto-merge`
+- **Stale branches not auto-deleted** → `gh repo edit wuhu-labs/<repo> --delete-branch-on-merge`
+- **Squash-only not enforced** → disable other merge methods via the API.
+- **Branch protection missing on `main`** → set up a ruleset requiring status
+  checks before merge.
+
 ## Issue Workflow
 
-When you are assigned to work on a `WUHU-####` issue, you must create a new
-branch:
+Issues live in child repos, not in the umbrella. When assigned to work on a
+`WUHU-####` issue in a child repo:
 
 1. If you are already on a new branch that has no changes and has no new
    commits ahead of `main`, assume that branch is for you.
