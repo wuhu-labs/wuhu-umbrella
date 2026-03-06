@@ -6,6 +6,7 @@ wuhu-app/
 wuhu-site/
 wuhu-markdown-ui/
 wuhu/
+wuhu-yamux/
 
 # OS / editor
 .DS_Store
