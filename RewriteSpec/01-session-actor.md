@@ -57,9 +57,9 @@ struct AgentState {
 }
 ```
 
-No guard tokens for async tasks. The actor manages concurrency through its
-isolation — guard tokens were an artifact of the EffectLoop needing to prevent
-`nextEffect` from double-scheduling work.
+Guard tokens for async tasks live in the session actor, not in `AgentState`.
+`AgentState` is the persistable/diffable state — guard tokens are transient
+coordination state that the actor manages directly.
 
 ## Consumers
 
