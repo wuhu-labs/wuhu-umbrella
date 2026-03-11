@@ -6,48 +6,68 @@ The session runtime is a Swift actor. It holds all session state in memory.
 Mutations are synchronous inside the actor. There is no persist-before-act
 requirement.
 
+The actor publishes its **state directly** via `AsyncStream`. It does not
+compute or publish diffs — consumers receive the full state snapshot on each
+change. Diffing is a separate concern handled by free functions.
+
 ```
 actor SessionActor {
-    // State
-    var transcript: Transcript       // append-only log
-    var steerQueue: MessageQueue     // drained before next inference
-    var followUpQueue: MessageQueue  // drained when AI stops calling tools
-    var toolState: ToolState         // active tool calls, dedupe tokens
-    var inferenceState: InferenceState  // idle/running/retry
-    var settings: SessionSettings
+    var state: AgentState
 
-    // Observation
-    func subscribe() -> AsyncStream<SessionDiff>
+    // Publishes the full state on each mutation
+    func subscribe() -> AsyncStream<AgentState>
 }
 ```
 
-## State Diffing
+## Diffing
 
-The `subscribe()` method returns a stream of diffs. Diffs are cheap to compute:
+Two free-form static methods on `AgentState` handle diff and patch:
 
-- **Transcript**: track last-flushed index, emit new entries.
-- **Queues**: stable IDs, entries immutable once enqueued. Diff is "new IDs since
-  last flush."
-- **Ephemeral state**: (inference stream, retry timers, bash progress) — snapshot
-  compare. These are O(1) in size.
+```swift
+static func diff(old: AgentState, new: AgentState) -> AgentPatch
+static func apply(patch: AgentPatch, to state: inout AgentState)
+```
+
+These are pure functions. Consumers call them as needed — the actor doesn't
+know or care about diffing.
+
+## AgentState — Draft Sketch
+
+⚠️ **This is a rough draft, not to be taken seriously. Structure will change.**
+
+```swift
+struct AgentState {
+    // Transcript
+    var transcript: Transcript
+
+    // Queues
+    var steerQueue: MessageQueue
+    var followUpQueue: MessageQueue
+
+    // Tool tracking
+    var toolCallResults: [String: ToolCallResult]  // tool call ID → result
+
+    // Inference
+    var lastInferenceError: InferenceError?
+
+    // Session metadata
+    var settings: SessionSettings
+    var title: String?
+    var status: SessionStatus
+}
+```
+
+No guard tokens for async tasks. The actor manages concurrency through its
+isolation — guard tokens were an artifact of the EffectLoop needing to prevent
+`nextEffect` from double-scheduling work.
 
 ## Consumers
 
-Different consumers attach to the same stream:
-
 | Consumer | What it does |
 |----------|-------------|
-| **Persistence observer** | Diffs → SQLite writes (async, background) |
-| **SSE/WebSocket transport** | Diffs → client notifications |
-| **SwiftUI projection** | Mechanical copy to `@Observable` class |
-| **Test harness** | Direct state inspection, no DB needed |
-
-## Single-Session In-App Mode
-
-For previews and testing, the session actor runs without the persistence
-observer. Same code, same logic — just no SQLite. SwiftUI hooks the actor
-directly via the observation projection. This makes sessions fully testable
-and previewable without any store setup.
+| **Persistence observer** | Receives state, diffs against last persisted version, writes changes to SQLite. Swaps in new "persisted version" only after write completes. |
+| **SwiftUI / in-app projection** | Receives state, maps + removeDuplicates, updates `@Observable` class. Same path for full app and single-session preview (just without persistence observer attached). |
+| **Test harness** | Direct state inspection on the actor, no observers needed |
 
 ## Dual Isolation
 
@@ -56,6 +76,6 @@ Same session code must work in two contexts:
 - **Server**: actor-isolated (own isolation domain)
 - **UI**: needs to project to `@MainActor` for SwiftUI
 
-The projection layer handles this: actor state → `AsyncStream<SessionDiff>` →
+The projection layer handles this: actor state → `AsyncStream<AgentState>` →
 `@Observable` class on `@MainActor`. The actor never touches MainActor; the
 projection bridges the gap.
