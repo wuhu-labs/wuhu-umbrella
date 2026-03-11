@@ -69,13 +69,4 @@ coordination state that the actor manages directly.
 | **SwiftUI / in-app projection** | Receives state, maps + removeDuplicates, updates `@Observable` class. Same path for full app and single-session preview (just without persistence observer attached). |
 | **Test harness** | Direct state inspection on the actor, no observers needed |
 
-## Dual Isolation
 
-Same session code must work in two contexts:
-
-- **Server**: actor-isolated (own isolation domain)
-- **UI**: needs to project to `@MainActor` for SwiftUI
-
-The projection layer handles this: actor state → `AsyncStream<AgentState>` →
-`@Observable` class on `@MainActor`. The actor never touches MainActor; the
-projection bridges the gap.
