@@ -21,8 +21,10 @@ Mount is **optional, a shorthand, not a gate.**
 ### What mount does:
 
 1. Sets a named alias for a URI prefix so the LLM can use relative paths.
-2. Optionally triggers context injection (AGENTS.md, skill index) — the natural
-   window for workspace awareness.
+2. Context awareness on mount — the natural window for workspace awareness
+   (AGENTS.md, skill index). Undecided whether this is force-injected into
+   the context, or emitted as an invitation in the mount tool result that the
+   LLM can choose to act on.
 
 ### What mount does NOT do:
 
@@ -31,13 +33,20 @@ Mount is **optional, a shorthand, not a gate.**
 
 ## Materialization
 
-Decoupled from mount entirely. Provisioning a workspace from a template is an
-admin/setup operation:
+Decoupled from mount. Mount as a tool is purely about creating an alias.
 
-- "Create this workspace from this template" → returns a path.
-- "Mount this path" → separate step.
+The correct tool for provisioning is undecided. It will likely be a separate tool
+that handles materialization (or other workspace creation) and then creates the
+mount alias as part of its result. For example:
 
-They happen in sequence but are not coupled in the same tool call.
+```
+create_sandbox({ type: "folder", template: "wuhu-umbrella-linux", ... })
+```
+
+(Name is provisional.)
+
+In this model, `mount` is just "create an alias for a URI prefix." Provisioning
+tools call mount internally after setting up the workspace.
 
 ## Mount Identity
 
