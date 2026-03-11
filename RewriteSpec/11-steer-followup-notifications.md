@@ -1,4 +1,4 @@
-# Lanes — Steer and FollowUp
+# Lanes — Steer, FollowUp, Notifications
 
 ## Definitions
 
@@ -7,6 +7,11 @@
   window.
 - **FollowUp messages**: new user turns. Drained when the LLM stops outputting tool
   calls (turn is complete).
+- **Notification messages**: system events delivered while the LLM is working (e.g.,
+  async bash completion, child session result, A2A callback). Conceptually different
+  from steer (system-originated, not user-originated) but **behaviorally identical**:
+  drained when tool calls complete, before the next inference call, injected into
+  the context window.
 
 ## Queue Properties
 
@@ -23,5 +28,6 @@ persistence observer sees new queue entries in the diff and writes them.
 ## No Change in Semantics
 
 The steer/followUp draining model is unchanged from the current implementation.
-The only difference is that queue management is no longer entangled with
-persist-first state transitions.
+Notifications are a new lane with steer-identical draining behavior.
+The only difference from the current codebase is that queue management is no longer
+entangled with persist-first state transitions.
